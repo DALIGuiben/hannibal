@@ -1,33 +1,59 @@
 # Hannibal Legacy
 
-A Flutter app with a Home tab and two experiences in a fixed bottom navigation bar:
+An interactive Flutter app that turns Hannibal Barca's history into a decision game and a shareable personality result. Built for **L'IA au service d'Hannibal Barca**.
 
-- **Hannibal's Dilemma:** seven swipeable decisions per run, each followed by game trade-offs and a separate historical fact. The question bank covers Hannibal's Iberian command, Saguntum, the road to Italy, the Italian campaign, his return to Africa, and his later reforms in Carthage.
-- **Hannibal Wrapped:** seven situational questions per run that combine with the campaign choices to produce a historical personality match.
+The app has two connected experiences:
 
-Each experience draws from a rotating 14-question bank, so the next run has no questions from the run immediately before it. After the bank is exhausted, earlier questions return in a new order. Historical facts, trait scores, and matches remain authored and deterministic. The optional AI narrator adds a short field note after a decision and a personalized Wrapped description. If the API is unavailable, the built-in text appears immediately and play continues.
+- **Hannibal's Dilemma** — Swipe through seven decisions inspired by real turning points in Hannibal's story. Each choice reveals game trade-offs and a separate historical truth.
+- **Hannibal Wrapped** — Answer seven situational questions to discover an ancient-leader match, four personality scores, and a memorable fatal flaw. Choices made in Dilemma influence the result.
 
-Use the gear in the top-right corner of Home to switch the entire experience between English, French, and Arabic. The choice is saved on the device, and Arabic uses a right-to-left layout. The campaign, quiz, results, and copied share text all follow the selected language.
+Both experiences draw from rotating banks of 14 prompts, so a replay gives you a different set. Historical facts and scoring are authored in the app; they do not depend on an AI service.
 
-Historical references for the new Dilemma chapter: [Polybius, *Histories*, Book III](https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0234%3Abook%3D3), [Livy, Book XXX](https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.02.0159%3Abook%3D30), and [Livy, Book XXXIII](https://www.emersonkent.com/source_text/livius_the_history_of_rome_book_33.htm).
+## Features
 
-## Run
+- Home, Dilemma, and Wrapped in a fixed bottom navigation bar.
+- English, French, and Arabic, with right-to-left layout for Arabic. Change language from the gear on Home; the selection is saved locally.
+- Optional AI-written decision notes and Wrapped descriptions. The app remains playable offline or without an API key.
+- A 9:16 Wrapped poster exported as a 1080 × 1920 PNG for Instagram Stories on Android. Instagram opens its Story composer; **the user chooses whether to post**.
 
-From this directory:
+## Run locally
+
+Install Flutter and an Android emulator or connect an Android phone, then run from this repository:
 
 ```powershell
 flutter pub get
-flutter run -d R3CWA02G7AK
+flutter devices
+flutter run -d YOUR_DEVICE_ID
 ```
 
-To enable the optional AI writing through the configured `codex.sale` Responses endpoint and `gpt-4o`:
+The app works without API configuration. For optional AI narration, the current integration uses `gpt-4o` through the `codex.sale` Responses endpoint:
 
 ```powershell
-flutter run -d R3CWA02G7AK --dart-define=CODEX_LB_API_KEY=YOUR_KEY
+flutter run -d YOUR_DEVICE_ID --dart-define=CODEX_LB_API_KEY=YOUR_KEY
 ```
 
-`API_KEY` also works as a Dart define for older local launch configurations. Do not commit a real key. The campaign and quiz work without one.
+For a Meta-registered app, you may also pass `--dart-define=META_APP_ID=YOUR_META_APP_ID` to include `source_application` in the Instagram Story handoff.
 
-The Wrapped result is displayed as a 9:16 poster. **Share to Instagram Story** renders that poster as a 1080 × 1920 PNG and opens Instagram's Story composer on Android. The user can edit or cancel it there; the app never publishes automatically. Instagram must be installed on the device. The generated image is stored temporarily in the app's cache and shared through a read-only Android FileProvider URI. On iOS, the app currently shows an unsupported-platform message.
+**Keep credentials out of Git.** Dart defines are bundled into the compiled app, so this key setup is for a local demo, not a secure production release. A production version should send AI requests through a backend that keeps the key private.
 
-For Meta-registered apps, optionally pass `--dart-define=META_APP_ID=YOUR_META_APP_ID` so the Story intent includes `source_application`. Test the final handoff on a physical Android phone with Instagram installed; the emulator does not include Instagram.
+## Instagram Story sharing
+
+Finish Wrapped and tap **Share to Instagram Story**. The app renders the visible result as a PNG, shares it with Instagram through an Android `FileProvider`, and leaves editing and posting to the user.
+
+- Requires Instagram on the Android device; test the complete handoff on a physical phone.
+- Does not publish automatically or require Instagram login inside the app.
+- iOS Story sharing is not implemented yet; the app shows an unsupported-platform message there.
+
+## Check the project
+
+```powershell
+flutter analyze
+flutter test
+flutter build apk --release
+```
+
+The main implementation lives in `lib/hannibal_experience.dart`. The rotating questions, historical facts, and scoring are in `lib/experience_data.dart`; translations are in the `lib/experience_*localizations.dart` files. Optional AI narration is in `lib/ai_narrator.dart`, and the Instagram bridge is in `lib/instagram_story_share.dart` plus the Android `MainActivity.kt` and `StoryFileProvider.kt` files.
+
+## Historical reading
+
+The game separates the player's hypothetical choices from what the sources say happened. Starting points for the Punic War and Hannibal's later career include [Polybius, *Histories*, Book III](https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.01.0234%3Abook%3D3), [Livy, *History of Rome*, Book XXX](https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.02.0159%3Abook%3D30), and [Book XXXIII](https://www.emersonkent.com/source_text/livius_the_history_of_rome_book_33.htm).
